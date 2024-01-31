@@ -10,7 +10,12 @@ import SwiftUI
 struct OnboardingView: View {
     @AppStorage("onBoarding") var isOnboardingView : Bool = true
     
-    
+    @State private var buttonWidth : Double = UIScreen.main.bounds.width - 80
+    @State private var buttonOffset : CGFloat  = 0
+    @State private var isAnimated: Bool = false
+    @State private var imageOffset: CGSize = .zero
+    @State private var indicatorOpacity: Double = 1.0
+    @State private var titleText : String = "Share."
     var body: some View {
         ZStack{
           Color("ColorBlue")
@@ -20,10 +25,15 @@ struct OnboardingView: View {
                 Spacer()
                 
                 VStack(spacing: 0){
-                    Text("Share")
-                    .font(.system(size: 60))
-                    .fontWeight(.heavy)
-                    .foregroundColor(.white)
+                    Text(titleText)
+                        .font(.system(size: 60))
+                        .fontWeight(.heavy)
+                        .foregroundColor(.white)
+                        .offset(y : isAnimated ? 0 :  -40)
+                        .opacity( isAnimated ? 1 : 0 )
+                        .animation(.easeOut(duration: 1) , value: isAnimated)
+                        .id(titleText)
+                        .transition(.opacity)
                     
                      Text("""
           It's not how much we give but
@@ -37,12 +47,51 @@ struct OnboardingView: View {
                 }
                 
                 ZStack {
-                    CircleGroupView(ShapeColor: .white, ShapeOpacity: 0.2)
+                    CircleGroupView(ShapeColor: .white, ShapeOpacity: 0.3, RepeatedAnimation: false)
+                        .offset(x: imageOffset.width * -1)
+                        .blur(radius: abs(imageOffset.width / 5))
+                        .animation(.easeOut(duration: 1), value: imageOffset)
                     
                     Image("character-1")
                         .resizable()
                         .scaledToFit()
+                        .opacity(isAnimated ? 1 : 0 )
+                        .animation(.easeOut(duration: 1), value: isAnimated)
+                        .offset(x : imageOffset.width * 1.2 , y : 0)
+                        .rotationEffect(.degrees(imageOffset.width / 20))
+                        .gesture(
+                            DragGesture()
+                                .onChanged { gesture in
+                                    
+                                    if abs(imageOffset.width) <= 150 {
+                                        imageOffset = gesture.translation
+                                        
+                                        withAnimation(.linear(duration: 0.25)) {
+                                            indicatorOpacity = 0
+                                            titleText = "Give."                                     }
+                                        
+                                    }
+                                }
+                                .onEnded {_ in
+                                    imageOffset = .zero
+                                    withAnimation(.linear(duration: 0.25)) {
+                                        indicatorOpacity = 1
+                                        titleText = "Share."
+                                }
+                                }
+                        )
+                        .animation(.easeOut(duration: 1), value: imageOffset)
               }
+                .overlay(
+                    Image(systemName: "arrow.left.and.right.circle")
+                        .font(.system(size: 60, weight: .ultraLight))
+                        .foregroundColor(.white)
+                        .offset(y: 20)
+                        .opacity(indicatorOpacity)
+                        .animation(.easeOut(duration: 1).delay(2), value: isAnimated ? 1 : 0)
+                    , alignment: .bottom
+                )
+              
                 
                 Spacer()
                 
@@ -64,8 +113,6 @@ struct OnboardingView: View {
                             Capsule()
                                 .fill(Color.red)
                                 .frame(width: 80)
-                            
-                          
                         }
                         
                         Spacer()
@@ -84,23 +131,45 @@ struct OnboardingView: View {
                                 .foregroundColor(.white)
                                 .font(.system(size: 24))
                                 .fontWeight(.bold)
-                            
                         }
                         .foregroundColor(.white)
                         .frame(width: 80, height: 80, alignment: .center)
-                        .onTapGesture {
-                            isOnboardingView = false
-                        }
+                        .offset(x: buttonOffset)
+                        .gesture(
+                            DragGesture()
+                                .onChanged{ gesture in
+                                    if gesture.translation.width > 0 && buttonOffset <= buttonWidth - 80 {
+                                        buttonOffset = gesture.translation.width
+                                    }
+                                    
+                                }
+                                .onEnded { _ in
+                                    withAnimation(Animation.easeOut(duration: 0.5)) {
+                                        if buttonOffset > buttonWidth / 2 {
+                                            buttonOffset = buttonWidth - 80
+                                            isOnboardingView = false
+                                        }
+                                        else {
+                                            buttonOffset = 0
+                                        }
+                                    }
+                                }
+                        )
                         Spacer()
                     }
                     
                 }
               
-                .frame(height: 80, alignment: .center)
+                .frame(width: buttonWidth, height: 80, alignment: .center)
                 .padding()
+                .opacity(isAnimated ? 1 : 0 )
+                .offset(y: isAnimated ? 0 :  40 )
+                .animation(.easeOut(duration: 1) , value: isAnimated)
             }
         }
-          
+        .onAppear( perform: {
+            isAnimated  = true
+        })
     }
 }
 
