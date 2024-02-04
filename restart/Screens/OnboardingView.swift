@@ -29,11 +29,11 @@ struct OnboardingView: View {
                         .font(.system(size: 60))
                         .fontWeight(.heavy)
                         .foregroundColor(.white)
-                        .offset(y : isAnimated ? 0 :  -40)
-                        .opacity( isAnimated ? 1 : 0 )
-                        .animation(.easeOut(duration: 1) , value: isAnimated)
-                        .id(titleText)
                         .transition(.opacity)
+                     
+                       
+                        .id(titleText)
+                     
                     
                      Text("""
           It's not how much we give but
@@ -45,7 +45,12 @@ struct OnboardingView: View {
                         .fontWeight(.light)
                         .padding(.horizontal, 10)
                 }
+                .opacity( isAnimated ? 1 : 0 )
+                .offset(y : isAnimated ? 0 :  -40)
+                .animation(.easeOut(duration: 1) , value: isAnimated)
+            
                 
+              
                 ZStack {
                     CircleGroupView(ShapeColor: .white, ShapeOpacity: 0.3, RepeatedAnimation: false)
                         .offset(x: imageOffset.width * -1)
@@ -97,23 +102,23 @@ struct OnboardingView: View {
                 
                 
                 ZStack {
-                    Text("Get Started")
-                        .font(.title3)
-                        .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
-                        .offset(x: 20)
-                        .foregroundColor(.white)
                     Capsule()
                         .fill(Color.white.opacity(0.2))
                     Capsule()
                         .fill(Color.white.opacity(0.2))
                         .padding(8)
                     
+                    Text("Get Started")
+                        .font(.title3)
+                        .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
+                        .offset(x: 20)
+                        .foregroundColor(.white)
+             
+                    
                     HStack {
-                        ZStack {
-                            Capsule()
-                                .fill(Color.red)
-                                .frame(width: 80)
-                        }
+                        Capsule()
+                            .fill(Color("ColorRed"))
+                            .frame(width: buttonOffset + 80)
                         
                         Spacer()
                     }
